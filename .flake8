@@ -1,0 +1,3 @@
+[flake8]
+exclude = .venv,build,dist,.mypy_cache,.pytest_cache
+max-line-length = 79

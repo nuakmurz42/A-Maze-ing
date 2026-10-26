@@ -9,7 +9,10 @@ description = "Reusable recursive-backtracker maze generator for A-Maze-ing"
 readme = "README.md"
 requires-python = ">=3.10"
 license = {file = "LICENSE.md"}
-authors = [{name = "nurya"}]
+authors = [
+    {name = "nuakmurz"},
+    {name = "jsingh"},
+]
 
 [project.scripts]
 a-maze-ing = "a_maze_ing:main"

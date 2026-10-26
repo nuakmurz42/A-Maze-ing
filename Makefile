@@ -14,11 +14,11 @@ debug:
 clean:
 	rm -rf __pycache__ display/__pycache__ mazegen/__pycache__ parsing/__pycache__ tests/__pycache__ .mypy_cache .pytest_cache build dist maze.txt *.egg-info
 lint:
-	$(VENV)/bin/flake8 .
-	$(VENV)/bin/mypy . --warn-return-any --warn-unused-ignores --ignore-missing-imports --disallow-untyped-defs --check-untyped-defs
+	$(VENV)/bin/flake8 . --exclude .venv,build,dist
+	$(VENV)/bin/mypy . --exclude '(^\.venv/|^build/|^dist/)' --warn-return-any --warn-unused-ignores --ignore-missing-imports --disallow-untyped-defs --check-untyped-defs
 lint-strict:
-	$(VENV)/bin/flake8 .
-	$(VENV)/bin/mypy . --strict
+	$(VENV)/bin/flake8 . --exclude .venv,build,dist
+	$(VENV)/bin/mypy . --exclude '(^\.venv/|^build/|^dist/)' --strict
 test:
 	$(VENV_PYTHON) -m pytest tests
 build:

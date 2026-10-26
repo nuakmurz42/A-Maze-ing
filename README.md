@@ -1,4 +1,4 @@
-*This project has been created as part of the 42 curriculum by nurya.*
+*This project has been created as part of the 42 curriculum by nuakmurz, jsingh.*
 
 # A-Maze-ing
 
@@ -19,15 +19,75 @@ make install
 make run
 ```
 
+`Makefile` is a small command shortcut: it does not compile Python code.  It
+keeps the installation, checks, and package-build commands consistent.
+
+| Command | What it does |
+| --- | --- |
+| `make install` | Creates `.venv` with Python 3.12, upgrades `pip`, installs this project in editable mode, then installs the development tools from `requirements-dev.txt`. Run this once first. |
+| `make run` | Starts `a_maze_ing.py` with the default `config.txt`. |
+| `make test` | Runs the automated tests in `tests/` using the virtual environment. |
+| `make lint` | Runs `flake8` for formatting/style issues, then `mypy` with the project's typed-check options. A non-zero result means a code-quality or type-checking error must be fixed. |
+| `make lint-strict` | Runs `flake8` again and then `mypy --strict`, the strongest required type check. |
+| `make build` | Builds an installable wheel from `pyproject.toml` and places `mazegen-1.0.0-py3-none-any.whl` at the repository root. It requires `make install` first. |
+| `make check` | Runs lint, strict lint, tests, and the wheel build in sequence. |
+| `make clean` | Removes generated caches, build artefacts, test caches, and the generated `maze.txt`; it does not remove source files. |
+
+For a clean evaluation-style package check, run `make install`, `make check`,
+then install the generated wheel in a second virtual environment before
+running the application again.
+
+### Rebuild and verify the reusable wheel
+
+The following procedure verifies the reusable `mazegen` package independently
+of the development environment.  It is the procedure to demonstrate during
+the reusable-module part of the evaluation:
+
+```sh
+# 1. Build a fresh wheel from the source and pyproject.toml.
+make build
+
+# 2. Create a separate, clean environment for the installed package.
+python3.12 -m venv /tmp/mazegen-wheel-venv
+source /tmp/mazegen-wheel-venv/bin/activate
+
+# 3. Install exactly the wheel that was just built.
+python -m pip install --force-reinstall "$(pwd)/mazegen-1.0.0-py3-none-any.whl"
+
+# 4. Run the installed application with the repository configuration.
+a-maze-ing "$(pwd)/config.txt"
+
+deactivate
+```
+
+`make build` uses the build information in `pyproject.toml` and creates the
+wheel at the repository root.  `LICENSE.md` and `README.md` are kept at the
+repository root; the package metadata declares `LICENSE.md` as its license
+file.  Do not copy either file manually into the virtual environment: the
+wheel installation handles the package metadata.
+
+### Code-quality checks
+
+Run these commands after `make install`:
+
+```sh
+make lint
+make lint-strict
+```
+
+`make lint` verifies both Python style (`flake8`) and type annotations
+(`mypy`).  `make lint-strict` repeats the style check and requires the code to
+pass `mypy --strict`.  The project must finish both commands with exit status
+zero before delivery.  `make check` is the one-command equivalent for the
+full delivery check: linting, strict type checking, tests, and wheel build.
+
 The program is also run directly with:
 
 ```sh
 python3 a_maze_ing.py config.txt
 ```
 
-Useful checks are `make lint`, `make lint-strict`, `make test`, and
-`make build`.  `make build` creates `mazegen-1.0.0-py3-none-any.whl` at the
-repository root.  The generated `maze.txt` can be checked with:
+The generated `maze.txt` can be checked with:
 
 ```sh
 python3 maze_analyzer.py maze.txt --min-loops 2 --max-dead-ends 2
@@ -76,25 +136,46 @@ build` then `pip install mazegen-1.0.0-py3-none-any.whl`.
 ```python
 from mazegen import GeneratorConfig, MazeGenerator
 
-config = GeneratorConfig(20, 15, (0, 0), (19, 14), False, "42")
+config = GeneratorConfig(
+    width=20,
+    height=15,
+    entry=(0, 0),
+    exit=(19, 14),
+    perfect=False,
+    seed="42",
+)
 maze = MazeGenerator(config)
 maze.generate()
-print(maze.walls)
-print(maze.shortest_path())
+walls = maze.walls                 # Generated maze structure
+shortest_path = maze.shortest_path()  # One shortest N/E/S/W solution
+print(walls)
+print(shortest_path)
 ```
 
 ## Team and project management
 
-This is an individual project.  The author handled design, implementation,
-tests, and documentation.  The plan was to first validate parsing and wall
-coherence, then implement generation and BFS, then add terminal interaction
-and package checks.  Keeping the generator separate from parsing and display
-made the algorithm easy to test and package; earlier integration checks would
-have made setup issues visible sooner.  Development tools: Python, `pytest`,
-`flake8`, `mypy`, `pip`, and `make`.
+### Roles
+
+- **nuakmurz**: core maze-generator design, package integration, and terminal
+  application implementation.
+- **jsingh**: configuration parsing and output writing implementation
+  (`parsing/config_parser.py` and `parsing/output_writer.py`), automated test
+  implementation, documentation review, and final repository checks.
+
+Both members reviewed the mandatory requirements and the final behaviour.
+
+### Planning and retrospective
+
+The original plan was to validate parsing and wall coherence first, then
+implement generation and BFS, and finally add terminal interaction and
+package checks.  Keeping the generator separate from parsing and display made
+the algorithm easy to test and package.  The separation of concerns and
+automated checks worked well; running packaging and terminal checks earlier
+would have surfaced environment and terminal-size issues sooner.
+
+Development tools: Python, `pytest`, `flake8`, `mypy`, `pip`, `venv`, `make`,
+and Git/GitHub.
 
 ## Resources and AI use
-
-[](https://docs.python.org/3/library/random.html)
-- [Python deque documentation](https://docs.python.org/3/library/collections.html#collections.deque)[](https://en.wikipedia.org/wiki/Depth-first_search)
-- 42 A-Maze-ing subject, version 2.3
+AI assistance was used to review the mandatory checklist, clarify
+documentation and test cases, and propose improvements README.

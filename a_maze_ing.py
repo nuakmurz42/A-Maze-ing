@@ -6,7 +6,6 @@ from __future__ import annotations
 from typing import Final, List
 
 from display.ascii_display import render_maze
-from display.curses_display import run as run_curses
 from mazegen import MazeGenerator
 from parsing.config_parser import ConfigError, read_config
 from parsing.output_writer import write_output
@@ -36,7 +35,7 @@ def show(maze: MazeGenerator, path: List[str], visible: bool,
 
 
 def interactive_plain(maze: MazeGenerator) -> None:
-    """Run the menu in a non-interactive terminal or curses fallback."""
+    """Run the portable text-based interactive menu."""
     path = maze.shortest_path()
     visible = True
     colours = ["36", "33", "35", "32"]
@@ -63,16 +62,8 @@ def interactive_plain(maze: MazeGenerator) -> None:
 
 
 def interactive(maze: MazeGenerator) -> None:
-    """Run the full-screen terminal interface when the terminal supports it."""
-    import sys
-
-    if not sys.stdin.isatty() or not sys.stdout.isatty():
-        interactive_plain(maze)
-        return
-    try:
-        run_curses(maze, write_output)
-    except OSError:
-        interactive_plain(maze)
+    """Open the portable text interface for the generated maze."""
+    interactive_plain(maze)
 
 
 def main() -> int:
